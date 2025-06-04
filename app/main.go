@@ -19,6 +19,7 @@ func main() {
 	}
 
 	switch command := os.Args[1]; command {
+	//Initialize git
 	case "init":
 		if err := initCommand(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -26,6 +27,7 @@ func main() {
 		}
 		fmt.Println("Initialized git directory")
 
+		//Read Blob Object
 	case "cat-file":
 		if len(os.Args) != 4 || os.Args[2] != "-p" {
 			fmt.Fprintf(os.Stderr, "usage: mygit cat-file -p <object-hash>\n")
@@ -47,15 +49,15 @@ func main() {
 }
 
 func initCommand() error {
-	for _, dir := range []string{".git", ".git/objects", ".git/refs"} {
+	for _, dir := range []string{".mygit", ".mygit/objects", ".mygit/refs"} {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("Error creating directory: %s: %w\n", dir, err)
 		}
 	}
 
 	headFileContents := []byte("ref: refs/heads/main\n")
-	if err := os.WriteFile(".git/HEAD", headFileContents, 0644); err != nil {
-		return fmt.Errorf("Error writing .git/HEAD: %w\n", err)
+	if err := os.WriteFile(".mygit/HEAD", headFileContents, 0644); err != nil {
+		return fmt.Errorf("Error writing .mygit/HEAD: %w\n", err)
 	}
 
 	return nil
@@ -71,7 +73,7 @@ func catFileCommand(hash string) ([]byte, error) {
 
 	dirName := objectHash[0:2]
 	fileName := objectHash[2:]
-	filePath := fmt.Sprintf("./.git/objects/%s/%s", dirName, fileName)
+	filePath := fmt.Sprintf("./.mygit/objects/%s/%s", dirName, fileName)
 
 	fileContents, err := os.ReadFile(filePath)
 	if err != nil {
