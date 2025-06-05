@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"compress/zlib"
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -45,9 +47,17 @@ func main() {
 		//Create Blob Objects
 	case "hash-object":
 		if len(os.Args) != 4 || os.Args[2] != "-w" {
-			fmt.Fprintf(os.Stderr, "usage: mygit hash-object -w <Message>")
+			fmt.Fprintf(os.Stderr, "usage: mygit hash-object -w <file>")
 			os.Exit(1)
 		}
+
+		hashedObject, err := hashObjectCommand(os.Args[3])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		fmt.Print(hashedObject)
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
@@ -110,4 +120,28 @@ func catFileCommand(hash string) ([]byte, error) {
 
 	content := decompressedData[nullIndex+1:]
 	return content, nil
+}
+
+func hashObjectCommand(file string) (string, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return "", fmt.Errorf("mygit: failed to open file '%s': %w", file, err)
+	}
+	header := fmt.Sprintf("blob %d \x00 %s\n", len(data), string(data))
+
+	hashedData := sha1.Sum([]byte(header))
+	hashedHexString := hex.EncodeToString(hashedData[:])
+
+	dirName := fmt.Sprintf(".mygit/objects/%s", hashedHexString[0:2])
+	fileName := fmt.Sprintf(".mygit/objects/%s/%s", hashedHexString[0:2], hashedHexString[2:])
+
+	if err := os.MkdirAll(dirName, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating directory '%s': %v\n", dirName, err)
+	}
+
+	if err := os.WriteFile(fileName, hashedData[:], 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating filename '%s': %v\n", fileName, err)
+	}
+
+	return fileName, nil
 }
