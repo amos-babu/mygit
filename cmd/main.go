@@ -27,7 +27,7 @@ func main() {
 		}
 		fmt.Println("Initialized git directory")
 
-		//Read Blob Object
+		//Read Blob Objects
 	case "cat-file":
 		if len(os.Args) != 4 || os.Args[2] != "-p" {
 			fmt.Fprintf(os.Stderr, "usage: mygit cat-file -p <object-hash>\n")
@@ -41,6 +41,13 @@ func main() {
 		}
 
 		fmt.Print(string(content))
+
+		//Create Blob Objects
+	case "hash-object":
+		if len(os.Args) != 4 || os.Args[2] != "-w" {
+			fmt.Fprintf(os.Stderr, "usage: mygit hash-object -w <Message>")
+			os.Exit(1)
+		}
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
@@ -73,7 +80,7 @@ func catFileCommand(hash string) ([]byte, error) {
 
 	dirName := objectHash[0:2]
 	fileName := objectHash[2:]
-	filePath := fmt.Sprintf("./.mygit/objects/%s/%s", dirName, fileName)
+	filePath := fmt.Sprintf(".mygit/objects/%s/%s", dirName, fileName)
 
 	fileContents, err := os.ReadFile(filePath)
 	if err != nil {
