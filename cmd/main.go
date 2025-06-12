@@ -57,7 +57,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Print(hashedObject)
+		fmt.Printf("%s\n", hashedObject)
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
@@ -92,6 +92,8 @@ func catFileCommand(hash string) ([]byte, error) {
 	fileName := objectHash[2:]
 	filePath := fmt.Sprintf(".mygit/objects/%s/%s", dirName, fileName)
 
+	// fmt.Println(filePath)
+
 	fileContents, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %s\n", err)
@@ -102,7 +104,8 @@ func catFileCommand(hash string) ([]byte, error) {
 	r, err := zlib.NewReader(b)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decompressing the file: %s\n", err)
-		os.Exit(1)
+		// os.Exit(1)
+		panic(err)
 	}
 
 	decompressedData, err := io.ReadAll(r)
@@ -143,5 +146,5 @@ func hashObjectCommand(file string) (string, error) {
 		fmt.Fprintf(os.Stderr, "Error creating filename '%s': %v\n", fileName, err)
 	}
 
-	return fileName, nil
+	return hashedHexString[2:], nil
 }
