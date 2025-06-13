@@ -104,8 +104,8 @@ func catFileCommand(hash string) ([]byte, error) {
 	r, err := zlib.NewReader(b)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decompressing the file: %s\n", err)
-		// os.Exit(1)
-		panic(err)
+		os.Exit(1)
+		// panic(err)
 	}
 
 	decompressedData, err := io.ReadAll(r)
@@ -139,10 +139,6 @@ func hashObjectCommand(file string) (string, error) {
 	hashedData := sha1.Sum([]byte(fullData))
 	hashedHexString := hex.EncodeToString(hashedData[:])
 
-	dirName := fmt.Sprintf(".mygit/objects/%s", hashedHexString[0:2])
-	fileName := fmt.Sprintf(".mygit/objects/%s/%s", hashedHexString[0:2], hashedHexString[2:])
-	// fmt.Println(fileName)
-
 	//compress the object using zlib
 	var compressed bytes.Buffer
 	w := zlib.NewWriter(&compressed)
@@ -151,6 +147,11 @@ func hashObjectCommand(file string) (string, error) {
 		return "", fmt.Errorf("failed to compress: %w", err)
 	}
 	w.Close()
+
+	// Save to .mygit/objects/xx/yyyyyy...
+	dirName := fmt.Sprintf(".mygit/objects/%s", hashedHexString[0:2])
+	fileName := fmt.Sprintf(".mygit/objects/%s/%s", hashedHexString[0:2], hashedHexString[2:])
+	fmt.Println(fileName)
 
 	if err := os.MkdirAll(dirName, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating directory '%s': %v\n", dirName, err)
