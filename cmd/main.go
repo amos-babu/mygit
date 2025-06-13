@@ -130,13 +130,27 @@ func hashObjectCommand(file string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("mygit: failed to open file '%s': %w", file, err)
 	}
-	header := fmt.Sprintf("blob %d \x00 %s\n", len(data), string(data))
 
-	hashedData := sha1.Sum([]byte(header))
+	//Format: "blob <size>\x00<content>"
+	header := fmt.Sprintf("blob %d\x00", len(data))
+	fullData := append([]byte(header), data...)
+
+	//Hashing the Object Data
+	hashedData := sha1.Sum([]byte(fullData))
 	hashedHexString := hex.EncodeToString(hashedData[:])
 
 	dirName := fmt.Sprintf(".mygit/objects/%s", hashedHexString[0:2])
 	fileName := fmt.Sprintf(".mygit/objects/%s/%s", hashedHexString[0:2], hashedHexString[2:])
+	// fmt.Println(fileName)
+
+	//compress the object using zlib
+	var compressed bytes.Buffer
+	w := zlib.NewWriter(&compressed)
+	_, err = w.Write(fullData)
+	if err != nil {
+		return "", fmt.Errorf("failed to compress: %w", err)
+	}
+	w.Close()
 
 	if err := os.MkdirAll(dirName, 0755); err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating directory '%s': %v\n", dirName, err)
@@ -146,5 +160,5 @@ func hashObjectCommand(file string) (string, error) {
 		fmt.Fprintf(os.Stderr, "Error creating filename '%s': %v\n", fileName, err)
 	}
 
-	return hashedHexString[2:], nil
+	return hashedHexString, nil
 }
