@@ -1,3 +1,3 @@
-module github.com/codecrafters-io/git-starter-go
+module github.com/amos-babu/mygit
 
 go 1.24.0

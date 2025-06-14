@@ -31,8 +31,8 @@ func CatFileCommand(hash string) ([]byte, error) {
 	r, err := zlib.NewReader(b)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decompressing the file: %s\n", err)
-		os.Exit(1)
-		// panic(err)
+		// os.Exit(1)
+		panic(err)
 	}
 
 	decompressedData, err := io.ReadAll(r)

@@ -40,7 +40,7 @@ func HashObjectCommand(file string) (string, error) {
 		fmt.Fprintf(os.Stderr, "Error creating directory '%s': %v\n", dirName, err)
 	}
 
-	if err := os.WriteFile(fileName, hashedData[:], 0644); err != nil {
+	if err := os.WriteFile(fileName, compressed.Bytes(), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating filename '%s': %v\n", fileName, err)
 	}
 
