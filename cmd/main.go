@@ -53,6 +53,11 @@ func main() {
 		}
 
 		fmt.Printf("%s\n", hashedObject)
+	case "ls-tree":
+		if len(os.Args) != 4 || os.Args[2] != "--name-only" {
+			fmt.Fprintf(os.Stderr, "usage: mygit ls-tree --name-only <tree-sha>")
+			os.Exit(1)
+		}
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
