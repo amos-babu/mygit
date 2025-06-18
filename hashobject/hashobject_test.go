@@ -50,6 +50,8 @@ func TestHashObjectCommand(t *testing.T) {
 		t.Fatalf("failed to read object file: %v", err)
 	}
 
+	defer os.RemoveAll(".mygit")
+
 	// Decompress the file
 	r, err := zlib.NewReader(bytes.NewReader(data))
 	if err != nil {
@@ -65,7 +67,5 @@ func TestHashObjectCommand(t *testing.T) {
 	if !bytes.Equal(decompressed, fullData) {
 		t.Errorf("decompressed content mismatch.\nExpected: %q\nGot: %q", fullData, decompressed)
 	}
-
-	defer os.RemoveAll(objectPath)
 
 }
